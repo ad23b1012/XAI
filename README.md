@@ -54,31 +54,55 @@ MediaPipe Face Mesh (468 landmarks)
 ## 🛠️ Setup
 
 ### Prerequisites
-- Python 3.10+
+- **Python 3.10–3.12** (3.12 recommended)
 - NVIDIA GPU with 6GB+ VRAM (tested on RTX 4050)
-- [uv](https://github.com/astral-sh/uv) for dependency management
+- [uv](https://docs.astral.sh/uv/) — one-command install below
 
-### Installation
+### Quick Start (Any Laptop — 3 Commands)
 ```bash
-# Clone the repository
-git clone https://github.com/ad23b1012/MemoryPalAI.git
-cd MemoryPalAI
+# 1. Install uv (if not already installed — works on Windows, Mac, Linux)
+curl -LsSf https://astral.sh/uv/install.sh | sh   # Mac/Linux
+# or: powershell -c "irm https://astral.sh/uv/install.ps1 | iex"  # Windows
 
-# Install with uv
+# 2. Clone and install everything (uv handles Python + all dependencies)
+git clone https://github.com/ad23b1012/XAI.git
+cd XAI
 uv sync
 
-# Or with pip
-pip install -e ".[dev]"
+# 3. Done! Run with:
+uv run python scripts/demo.py --image path/to/face.jpg
+```
+
+> **Note:** `uv sync` will automatically install the correct Python version (3.10–3.12) if it's not on your system, create a virtual environment, and install all dependencies including PyTorch with CUDA support. No manual setup needed.
+
+### Running Scripts (Always Use `uv run`)
+```bash
+# Train the classifier
+uv run python scripts/train_classifier.py --model poster_v2 --dataset fer2013 --data-path data/fer2013/fer2013.csv
+
+# Evaluate
+uv run python scripts/evaluate.py --model poster_v2 --checkpoint checkpoints/poster_v2_best.pth --data-path data/fer2013/fer2013.csv
+
+# Full XAI demo
+uv run python scripts/demo.py --image path/to/face.jpg
 ```
 
 ### Download FER2013 Dataset
 ```bash
-# Via Kaggle CLI
-kaggle datasets download -d msambare/fer2013
+# Option 1: Via Kaggle CLI
+uv run kaggle datasets download -d msambare/fer2013
 unzip fer2013.zip -d data/fer2013/
 
-# Or download manually from:
-# https://www.kaggle.com/datasets/msambare/fer2013
+# Option 2: Download manually from https://www.kaggle.com/datasets/msambare/fer2013
+# Place fer2013.csv into data/fer2013/
+```
+
+### Fallback: pip install (if you don't want uv)
+```bash
+python -m venv .venv
+source .venv/bin/activate       # Linux/Mac
+# .venv\Scripts\activate        # Windows
+pip install -e ".[dev]"
 ```
 
 ---
