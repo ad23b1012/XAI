@@ -266,9 +266,32 @@ Step 9  →  Visualization: landmark overlay + heatmap overlay + combined XAI pa
 |---|:---:|:---:|
 | Aly et al. (ResNet-50+CBAM, 2023) | 73.43% | 87.62% |
 | ResNet-50+CBAM *(ours, reproduced)* | TBD | TBD |
-| **POSTER V2 *(ours)*** | **TBD** | **TBD** |
+| **POSTER V2 *(ours, 46 epochs)*** | **62.44%** | TBD |
 
-> Results will be updated once training on FER2013 is complete.
+> FER2013 test split (7,178 images). Training ran for 46 epochs with Class-Weighted Focal Loss, AMP, and cosine LR schedule. Best validation accuracy reached **62.45%** at epoch 36.
+
+### Per-Class Performance — POSTER V2 on FER2013 Test Set
+
+| Emotion | Precision | Recall | F1-Score | Support |
+|---|:---:|:---:|:---:|:---:|
+| Angry | 56.4% | 47.1% | 51.3% | 958 |
+| Disgust | 37.8% | 64.0% | 47.5% | 111 |
+| Fear | 47.4% | 35.2% | 40.4% | 1,024 |
+| **Happy** | **86.8%** | **81.7%** | **84.2%** | 1,774 |
+| Sad | 49.5% | 56.4% | 52.7% | 1,247 |
+| **Surprise** | **67.0%** | **81.9%** | **73.7%** | 831 |
+| Neutral | 57.8% | 62.1% | 59.9% | 1,233 |
+| **Weighted Avg** | **62.6%** | **62.4%** | **62.1%** | **7,178** |
+
+> **Notes:** Happy and Surprise are the strongest classes due to clear geometric AU signals. Disgust (n=111) and Fear suffer from extreme class imbalance despite Focal Loss weighting — a known FER2013 challenge. Training without a pre-trained IR-50 backbone (trained from scratch) is the primary bottleneck; loading ArcFace weights would likely push accuracy toward 67–70%.
+
+### Training Curve Summary
+
+| Phase | Epochs | Train Acc | Val Acc |
+|---|:---:|:---:|:---:|
+| Warmup (cosine ramp) | 1–5 | 13% → 37% | 19% → 36% |
+| Main training | 6–36 | 41% → 62% | 43% → **62.45%** ← best |
+| Late convergence | 37–46 | 67% → 70% | 59% → 59% (slight overfit) |
 
 ### VRAM Budget (RTX 4050 6 GB)
 
