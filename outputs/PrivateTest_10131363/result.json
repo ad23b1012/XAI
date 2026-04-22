@@ -1,0 +1,43 @@
+{
+  "image_path": "FER/test/angry/PrivateTest_10131363.jpg",
+  "processing_time": 8.38,
+  "face_found": true,
+  "emotion": {
+    "label": "angry",
+    "confidence": 0.4967,
+    "top_predictions": [
+      {
+        "label": "angry",
+        "confidence": 0.4967
+      },
+      {
+        "label": "disgust",
+        "confidence": 0.2259
+      },
+      {
+        "label": "happy",
+        "confidence": 0.1266
+      }
+    ]
+  },
+  "action_units": {
+    "active": [
+      "AU1",
+      "AU2",
+      "AU5",
+      "AU12",
+      "AU15",
+      "AU25",
+      "AU26"
+    ],
+    "descriptions": "- AU1 (Inner Brow Raise): inner eyebrows raised (strength: 0.2937)\n- AU2 (Outer Brow Raise): outer eyebrows raised (strength: 0.1266)\n- AU5 (Upper Lid Raise): eyes wide open (strength: 0.0349)\n- AU12 (Lip Corner Puller): lip corners pulled up (smile) (strength: 0.3454)\n- AU15 (Lip Corner Depressor): lip corners pulled down (frown) (strength: 0.0434)\n- AU25 (Lips Part): lips parted (strength: 0.1232)\n- AU26 (Jaw Drop): mouth open (jaw dropped) (strength: 0.3569)"
+  },
+  "attention": {
+    "regions": [
+      "left_cheek"
+    ],
+    "summary": "- Mild attention on left cheek area (intensity: 0.24)"
+  },
+  "explanation": "The predicted emotion of anger was correctly identified based on the observed facial features and model attention regions. The key features that support this prediction include:\n\n1. **Raised Inner Brows**: This indicates a strong emotional response, often associated with anger.\n2. **Lip Corners Raised**: This feature is commonly used to indicate anger, as it suggests a state of heightened arousal.\n3. **Lips Partly Open**: This action typically conveys a sense of frustration or irritation, which is consistent with anger.\n\nThe model's attention region on the left cheek area also supports this prediction by indicating a high level of engagement with the face, likely due to the intensity of the emotion being expressed.\n\nGiven the combination of these features and the moderate confidence score of",
+  "visualizations": {}
+}

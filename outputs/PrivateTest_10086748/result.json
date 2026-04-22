@@ -1,0 +1,41 @@
+{
+  "image_path": "FER/test/neutral/PrivateTest_10086748.jpg",
+  "processing_time": 7.0,
+  "face_found": true,
+  "emotion": {
+    "label": "neutral",
+    "confidence": 0.3262,
+    "top_predictions": [
+      {
+        "label": "neutral",
+        "confidence": 0.3262
+      },
+      {
+        "label": "angry",
+        "confidence": 0.2212
+      },
+      {
+        "label": "fear",
+        "confidence": 0.214
+      }
+    ]
+  },
+  "action_units": {
+    "active": [
+      "AU1",
+      "AU2",
+      "AU5",
+      "AU12",
+      "AU26"
+    ],
+    "descriptions": "- AU1 (Inner Brow Raise): inner eyebrows raised (strength: 0.2756)\n- AU2 (Outer Brow Raise): outer eyebrows raised (strength: 0.0899)\n- AU5 (Upper Lid Raise): eyes wide open (strength: 0.0775)\n- AU12 (Lip Corner Puller): lip corners pulled up (smile) (strength: 0.3275)\n- AU26 (Jaw Drop): mouth open (jaw dropped) (strength: 0.2905)"
+  },
+  "attention": {
+    "regions": [
+      "nose"
+    ],
+    "summary": "- Weak attention on nose area (intensity: 0.14)"
+  },
+  "explanation": "The predicted emotion is neutral because the observed facial features and model attention regions do not strongly indicate anger or fear. The raised inner eyebrows, lip corners pulled up, and calm expression are consistent with a neutral emotional state rather than either anger or fear. The weak attention on the nose area further supports this conclusion by indicating that the model is less focused on identifying specific emotions compared to other areas like the jaw drop. This alignment between the observed features and the predicted emotion provides strong support for the neutral prediction.",
+  "visualizations": {}
+}

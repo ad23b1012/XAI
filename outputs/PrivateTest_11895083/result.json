@@ -1,0 +1,43 @@
+{
+  "image_path": "FER/test/disgust/PrivateTest_11895083.jpg",
+  "processing_time": 8.97,
+  "face_found": true,
+  "emotion": {
+    "label": "fear",
+    "confidence": 0.3974,
+    "top_predictions": [
+      {
+        "label": "fear",
+        "confidence": 0.3974
+      },
+      {
+        "label": "sad",
+        "confidence": 0.1765
+      },
+      {
+        "label": "angry",
+        "confidence": 0.1474
+      }
+    ]
+  },
+  "action_units": {
+    "active": [
+      "AU1",
+      "AU2",
+      "AU5",
+      "AU12",
+      "AU15",
+      "AU25",
+      "AU26"
+    ],
+    "descriptions": "- AU1 (Inner Brow Raise): inner eyebrows raised (strength: 0.3161)\n- AU2 (Outer Brow Raise): outer eyebrows raised (strength: 0.1081)\n- AU5 (Upper Lid Raise): eyes wide open (strength: 0.0966)\n- AU12 (Lip Corner Puller): lip corners pulled up (smile) (strength: 0.3431)\n- AU15 (Lip Corner Depressor): lip corners pulled down (frown) (strength: 0.0734)\n- AU25 (Lips Part): lips parted (strength: 0.0397)\n- AU26 (Jaw Drop): mouth open (jaw dropped) (strength: 0.2882)"
+  },
+  "attention": {
+    "regions": [
+      "chin"
+    ],
+    "summary": "- Weak attention on chin area (intensity: 0.14)"
+  },
+  "explanation": "The predicted emotion of fear was correctly identified based on the observed facial features and model attention regions. The key features that support this prediction include:\n\n1. **Inner Eyebrows Raised**: This indicates alertness and concern.\n2. **Lip Corners Pulled Up**: This suggests discomfort or distress.\n3. **Mouth Open / Jaw Dropped**: These actions often accompany feelings of fear or anxiety.\n\nThe model's attention region on the chin area is weak, which supports the prediction of sadness rather than anger. However, the overall context and intensity of the facial features strongly suggest a fear response. The combination of raised eyebrows, widened eyes, and the appearance of a frowning lip corner all point towards a fearful state. Therefore, despite the",
+  "visualizations": {}
+}

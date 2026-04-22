@@ -1,0 +1,42 @@
+{
+  "image_path": "FER/test/happy/PrivateTest_10077120.jpg",
+  "processing_time": 8.78,
+  "face_found": true,
+  "emotion": {
+    "label": "happy",
+    "confidence": 0.7364,
+    "top_predictions": [
+      {
+        "label": "happy",
+        "confidence": 0.7364
+      },
+      {
+        "label": "disgust",
+        "confidence": 0.1554
+      },
+      {
+        "label": "neutral",
+        "confidence": 0.0535
+      }
+    ]
+  },
+  "action_units": {
+    "active": [
+      "AU1",
+      "AU2",
+      "AU5",
+      "AU12",
+      "AU25",
+      "AU26"
+    ],
+    "descriptions": "- AU1 (Inner Brow Raise): inner eyebrows raised (strength: 0.2922)\n- AU2 (Outer Brow Raise): outer eyebrows raised (strength: 0.1171)\n- AU5 (Upper Lid Raise): eyes wide open (strength: 0.0512)\n- AU12 (Lip Corner Puller): lip corners pulled up (smile) (strength: 0.4984)\n- AU25 (Lips Part): lips parted (strength: 0.0313)\n- AU26 (Jaw Drop): mouth open (jaw dropped) (strength: 0.3109)"
+  },
+  "attention": {
+    "regions": [
+      "chin"
+    ],
+    "summary": "- Weak attention on chin area (intensity: 0.13)"
+  },
+  "explanation": "The predicted emotion of \"happy\" was correctly identified based on the observed facial features and model attention regions. The key features that support this prediction include:\n\n1. **Raised Inner Brows**: This indicates happiness through the act of raising one's brows.\n2. **Lip Corners Pulled Up**: This action often associated with happiness, particularly when someone smiles.\n3. **Crow's Feet Wrinkles Around Eyes**: These can also indicate happiness due to the relaxed appearance of the eyes.\n4. **Teeth Visible**: While not directly related to happiness, it suggests a smile-like expression which is commonly associated with happiness.\n\nThe model's strong attention on the chin area further supports the prediction by indicating engagement with the face. Given the high confidence",
+  "visualizations": {}
+}

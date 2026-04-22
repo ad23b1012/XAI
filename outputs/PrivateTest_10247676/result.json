@@ -1,0 +1,43 @@
+{
+  "image_path": "FER/test/sad/PrivateTest_10247676.jpg",
+  "processing_time": 8.02,
+  "face_found": true,
+  "emotion": {
+    "label": "fear",
+    "confidence": 0.4345,
+    "top_predictions": [
+      {
+        "label": "fear",
+        "confidence": 0.4345
+      },
+      {
+        "label": "sad",
+        "confidence": 0.2226
+      },
+      {
+        "label": "disgust",
+        "confidence": 0.1364
+      }
+    ]
+  },
+  "action_units": {
+    "active": [
+      "AU1",
+      "AU2",
+      "AU5",
+      "AU12",
+      "AU15",
+      "AU25",
+      "AU26"
+    ],
+    "descriptions": "- AU1 (Inner Brow Raise): inner eyebrows raised (strength: 0.3006)\n- AU2 (Outer Brow Raise): outer eyebrows raised (strength: 0.1134)\n- AU5 (Upper Lid Raise): eyes wide open (strength: 0.0829)\n- AU12 (Lip Corner Puller): lip corners pulled up (smile) (strength: 0.3559)\n- AU15 (Lip Corner Depressor): lip corners pulled down (frown) (strength: 0.0850)\n- AU25 (Lips Part): lips parted (strength: 0.0679)\n- AU26 (Jaw Drop): mouth open (jaw dropped) (strength: 0.3437)"
+  },
+  "attention": {
+    "regions": [
+      "chin"
+    ],
+    "summary": "- Weak attention on chin area (intensity: 0.16)"
+  },
+  "explanation": "The predicted emotion of fear was correctly identified based on the observed facial features and model attention regions. The key features that indicate fear include:\n\n- **Inner Brow Raise**: Raised eyebrows, which are characteristic of fear.\n- **Lip Corners Puller**: Lips parted, indicating alertness and concern.\n- **Lip Corners Depressor**: Lips closed, suggesting discomfort or distress.\n- **Jaw Drop**: Mouth opened, often associated with fear.\n\nThese features align perfectly with the expected emotions described by the top alternative prediction (\"sad\"), where the focus is on the lower body and facial expressions rather than the upper body and head. The weak attention on the chin area further supports the identification of sadness, as it indicates a more subdued emotional state",
+  "visualizations": {}
+}

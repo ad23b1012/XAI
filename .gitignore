@@ -1,7 +1,6 @@
 # Data & Models (too large for git)
 data/
 checkpoints/
-outputs/
 *.pt
 *.pth
 *.ckpt
