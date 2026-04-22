@@ -1,16 +1,23 @@
 """
-Face Detection & Landmark Extraction using MediaPipe Face Mesh.
+Face Detection & Landmark Extraction using MediaPipe Tasks SDK.
+
+Natively supports Python 3.12+ and MediaPipe 0.10.x+ by utilizing the
+modern `FaceLandmarker` object configurations.
 
 Detects faces in images and extracts 468/478 facial landmarks for
 downstream AU feature extraction and face cropping.
 """
 
+import os
 import cv2
-import mediapipe as mp
 import numpy as np
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 from PIL import Image
+
+import mediapipe as mp
+from mediapipe.tasks import python
+from mediapipe.tasks.python import vision
 
 
 @dataclass
@@ -27,9 +34,10 @@ class FaceDetectionResult:
 
 class FaceDetector:
     """
-    MediaPipe Face Mesh wrapper for face detection and landmark extraction.
+    MediaPipe Tasks FaceLandmarker wrapper for face detection.
 
-    Extracts 468 facial landmarks (or 478 with iris refinement) from input images.
+    Extracts 468 facial landmarks from input images using the offline
+    `face_landmarker.task` model blob.
     Provides face cropping with configurable padding for downstream processing.
     """
 
@@ -40,26 +48,29 @@ class FaceDetector:
         min_detection_confidence: float = 0.5,
         refine_landmarks: bool = True,
         face_crop_padding: float = 0.2,
+        model_asset_path: str = "src/face_detection/models/face_landmarker.task"
     ):
         """
-        Initialize the face detector.
-
-        Args:
-            static_image_mode: Process each image independently (True for static images).
-            max_num_faces: Maximum number of faces to detect.
-            min_detection_confidence: Minimum confidence threshold for face detection.
-            refine_landmarks: Whether to use 478 landmarks (includes iris).
-            face_crop_padding: Fraction of face bounding box to add as padding.
+        Initialize the face detector via MediaPipe Tasks SDK.
         """
         self.face_crop_padding = face_crop_padding
 
-        self.mp_face_mesh = mp.solutions.face_mesh
-        self.face_mesh = self.mp_face_mesh.FaceMesh(
-            static_image_mode=static_image_mode,
-            max_num_faces=max_num_faces,
-            min_detection_confidence=min_detection_confidence,
-            refine_landmarks=refine_landmarks,
+        if not os.path.exists(model_asset_path):
+            raise FileNotFoundError(f"Missing MediaPipe task file at {model_asset_path}. "
+                                     "Please download the float16 task blob from Google.")
+
+        base_options = python.BaseOptions(model_asset_path=model_asset_path)
+        options = vision.FaceLandmarkerOptions(
+            base_options=base_options,
+            running_mode=vision.RunningMode.IMAGE if static_image_mode else vision.RunningMode.VIDEO,
+            num_faces=max_num_faces,
+            min_face_detection_confidence=min_detection_confidence,
+            min_face_presence_confidence=min_detection_confidence,
+            output_face_blendshapes=False,
+            output_facial_transformation_matrixes=False,
         )
+
+        self.detector = vision.FaceLandmarker.create_from_options(options)
 
     def detect(self, image: np.ndarray) -> FaceDetectionResult:
         """
@@ -67,30 +78,34 @@ class FaceDetector:
 
         Args:
             image: Input image in BGR format (as read by cv2.imread).
-
-        Returns:
-            FaceDetectionResult containing landmarks, face crop, and bounding box.
         """
         h, w, _ = image.shape
         rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-        results = self.face_mesh.process(rgb_image)
+        # Convert to MediaPipe internal Image object required by modern Tasks SDK
+        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_image)
 
-        if not results.multi_face_landmarks:
+        results = self.detector.detect(mp_image)
+
+        if not results.face_landmarks:
             return FaceDetectionResult(face_found=False, image_shape=(h, w))
 
-        # Take the first detected face
-        face_landmarks = results.multi_face_landmarks[0]
+        # Take the first detected face (list of normalized landmarks)
+        face_landmarks = results.face_landmarks[0]
 
         # Extract normalized landmarks (x, y, z) — values in [0, 1]
         landmarks = np.array(
-            [(lm.x, lm.y, lm.z) for lm in face_landmarks.landmark],
+            [(lm.x, lm.y, lm.z) for lm in face_landmarks],
             dtype=np.float32,
         )
 
+        # Truncate to exactly 468 points to perfectly match the POSTER V2 structural requirements
+        # (FaceLandmarker might return 478 if irises are computed)
+        landmarks = landmarks[:468]
+
         # Convert to pixel coordinates
         landmarks_pixel = np.array(
-            [(lm.x * w, lm.y * h) for lm in face_landmarks.landmark],
+            [(lm[0] * w, lm[1] * h) for lm in landmarks],
             dtype=np.float32,
         )
 
@@ -113,7 +128,10 @@ class FaceDetector:
 
         # Crop face
         face_crop = image[y1:y2, x1:x2].copy()
-        face_crop_pil = Image.fromarray(cv2.cvtColor(face_crop, cv2.COLOR_BGR2RGB))
+        try:
+            face_crop_pil = Image.fromarray(cv2.cvtColor(face_crop, cv2.COLOR_BGR2RGB))
+        except Exception:
+            face_crop_pil = None
 
         return FaceDetectionResult(
             face_found=True,
@@ -126,37 +144,22 @@ class FaceDetector:
         )
 
     def detect_from_path(self, image_path: str) -> FaceDetectionResult:
-        """Load an image from path and detect face."""
         image = cv2.imread(image_path)
         if image is None:
             raise FileNotFoundError(f"Could not read image: {image_path}")
         return self.detect(image)
 
     def detect_from_pil(self, pil_image: Image.Image) -> FaceDetectionResult:
-        """Detect face from a PIL Image."""
         image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
         return self.detect(image)
 
     def get_face_width(self, landmarks: np.ndarray) -> float:
-        """
-        Compute face width from landmarks for normalization.
-
-        Uses the distance between landmarks 234 (left cheek) and 454 (right cheek)
-        as a stable face width measurement.
-
-        Args:
-            landmarks: Normalized landmarks array of shape (468, 3).
-
-        Returns:
-            Face width as a normalized distance.
-        """
         left_cheek = landmarks[234, :2]
         right_cheek = landmarks[454, :2]
         return np.linalg.norm(left_cheek - right_cheek)
 
     def close(self):
-        """Release MediaPipe resources."""
-        self.face_mesh.close()
+        self.detector.close()
 
     def __enter__(self):
         return self

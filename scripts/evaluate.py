@@ -10,6 +10,7 @@ import os
 import sys
 import json
 import numpy as np
+from tqdm import tqdm
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -32,7 +33,7 @@ def main():
     )
     parser.add_argument("--data-path", type=str, required=True)
     parser.add_argument("--checkpoint", type=str, required=True)
-    parser.add_argument("--split", type=str, default="PrivateTest")
+    parser.add_argument("--split", type=str, default="test")
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--output-dir", type=str, default="outputs")
 
@@ -53,14 +54,14 @@ def main():
 
     # Create dataloader
     if args.dataset == "fer2013":
-        test_loader = get_dataloader(
+        test_loader, _ = get_dataloader(
             "fer2013", args.data_path, split=args.split,
-            batch_size=args.batch_size, augment=False,
+            batch_size=args.batch_size, augment=False, num_workers=0
         )
     else:
-        test_loader = get_dataloader(
+        test_loader, _ = get_dataloader(
             "rafdb", args.data_path, split="test",
-            batch_size=args.batch_size, augment=False,
+            batch_size=args.batch_size, augment=False, num_workers=0
         )
 
     # Evaluate
@@ -70,11 +71,12 @@ def main():
     total = 0
 
     with torch.no_grad():
-        for images, targets in test_loader:
-            images = images.to(device)
-            targets = targets.to(device)
+        for images, targets, landmarks in tqdm(test_loader, desc="Evaluating Test Set"):
+            images = images.to(device, non_blocking=True)
+            targets = targets.to(device, non_blocking=True)
+            landmarks = landmarks.to(device, non_blocking=True)
 
-            outputs = model(images)
+            outputs = model(images, landmarks=landmarks)
             _, predicted = outputs.max(1)
 
             correct += predicted.eq(targets).sum().item()

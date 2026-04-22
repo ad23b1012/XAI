@@ -39,8 +39,8 @@ def draw_landmarks(
     """
     output = image.copy()
 
-    for i, (x, y) in enumerate(landmarks_pixel):
-        x, y = int(x), int(y)
+    for i, pt in enumerate(landmarks_pixel):
+        x, y = int(pt[0]), int(pt[1])
         if active_au_indices and i in active_au_indices:
             cv2.circle(output, (x, y), radius + 1, (0, 0, 255), -1)  # Red for active AUs
         else:

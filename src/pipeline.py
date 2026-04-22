@@ -31,6 +31,11 @@ from src.attention.grad_eclip import build_attention_generator
 from src.attention.region_parser import RegionParser, AttentionRegion
 from src.explainer.prompt_builder import PromptBuilder
 from src.explainer.vlm_engine import VLMEngine
+from src.visualization import (
+    draw_landmarks,
+    draw_heatmap_overlay,
+    create_combined_panel,
+)
 
 
 @dataclass
@@ -106,8 +111,8 @@ class XAIEmotionPipeline:
         model_name: str = "poster_v2",
         checkpoint_path: Optional[str] = None,
         attention_method: str = "grad_eclip",
-        vlm_model: str = "llava-hf/llava-1.5-7b-hf",
-        vlm_quantization: str = "4bit",
+        vlm_model: str = "Qwen/Qwen2.5-0.5B-Instruct",
+        vlm_quantization: str = "none",
         device: str = "auto",
         output_dir: str = "outputs",
         emotion_labels: Optional[List[str]] = None,
@@ -347,7 +352,34 @@ class XAIEmotionPipeline:
         face_result.face_crop_pil.save(crop_path)
         result.visualization_paths["face_crop"] = crop_path
 
-        print(f"[Save] Results saved to {output_subdir}/")
+        # Generate and save XAI Visualization Panel
+        np_img = np.array(face_result.face_crop_pil)
+        
+        # Landmark overlay
+        ldmk_img = draw_landmarks(
+            np_img, 
+            face_result.landmarks.cpu().numpy() if hasattr(face_result.landmarks, 'cpu') else face_result.landmarks
+        )
+        
+        # Heatmap overlay
+        hm_img = draw_heatmap_overlay(np_img, raw_cam)
+        
+        # Combined Panel
+        panel_path = os.path.join(output_subdir, "xai_panel.png")
+        create_combined_panel(
+            original_image=np_img,
+            landmark_image=ldmk_img,
+            heatmap_image=hm_img,
+            emotion_label=result.emotion_label,
+            confidence=result.confidence,
+            explanation=result.explanation,
+            active_aus=result.active_aus,
+            attention_summary=result.attention_summary,
+            output_path=panel_path
+        )
+        result.visualization_paths["xai_panel"] = panel_path
+
+        print(f"[Save] Results and Heatmaps saved to {output_subdir}/")
 
     def predict_batch(
         self,

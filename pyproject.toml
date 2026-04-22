@@ -19,12 +19,12 @@ dependencies = [
     "accelerate>=0.30.0",
 
     # Vision & Face Detection
-    "mediapipe>=0.10.0",
+    "mediapipe==0.10.33",
     "opencv-python>=4.8.0",
     "Pillow>=10.0.0",
 
     # Attention Maps
-    "pytorch-grad-cam>=1.5.0",
+    "grad-cam>=1.5.0",
 
     # Data & Scientific
     "numpy>=1.24.0",
@@ -75,3 +75,6 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]

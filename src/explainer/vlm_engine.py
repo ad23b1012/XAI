@@ -17,17 +17,16 @@ import gc
 
 class VLMEngine:
     """
-    LLaVA-7B Vision-Language Model engine for explanation generation.
+    Qwen-0.5B lightweight text model for explanation generation.
 
-    Loads the model with 4-bit quantization to fit on 6GB VRAM.
-    Generates grounded natural language explanations from face images
-    and structured evidence prompts.
+    Loads the model efficiently to easily fit on 16GB RAM and 6GB VRAM.
+    Generates grounded natural language explanations from structured evidence prompts.
     """
 
     def __init__(
         self,
-        model_name: str = "llava-hf/llava-1.5-7b-hf",
-        quantization: str = "4bit",
+        model_name: str = "Qwen/Qwen2.5-0.5B-Instruct",
+        quantization: str = "none",
         max_new_tokens: int = 150,
         temperature: float = 0.3,
         do_sample: bool = False,
@@ -63,41 +62,24 @@ class VLMEngine:
         if self._loaded:
             return
 
-        from transformers import LlavaForConditionalGeneration, AutoProcessor
+        from transformers import AutoModelForCausalLM, AutoTokenizer
 
-        print(f"[VLM] Loading {self.model_name} with {self.quantization} quantization...")
+        print(f"[LLM] Loading {self.model_name}...")
 
-        # Configure quantization
+        # Configure loading
         model_kwargs = {
             "torch_dtype": torch.float16,
             "low_cpu_mem_usage": True,
+            "device_map": "auto",
         }
 
-        if self.quantization == "4bit":
-            from transformers import BitsAndBytesConfig
-            model_kwargs["quantization_config"] = BitsAndBytesConfig(
-                load_in_4bit=True,
-                bnb_4bit_compute_dtype=torch.float16,
-                bnb_4bit_use_double_quant=True,
-                bnb_4bit_quant_type="nf4",
-            )
-            model_kwargs["device_map"] = "auto"
-        elif self.quantization == "8bit":
-            from transformers import BitsAndBytesConfig
-            model_kwargs["quantization_config"] = BitsAndBytesConfig(
-                load_in_8bit=True,
-            )
-            model_kwargs["device_map"] = "auto"
-        else:
-            model_kwargs["device_map"] = "auto"
-
-        self.processor = AutoProcessor.from_pretrained(self.model_name)
-        self.model = LlavaForConditionalGeneration.from_pretrained(
+        self.processor = AutoTokenizer.from_pretrained(self.model_name)
+        self.model = AutoModelForCausalLM.from_pretrained(
             self.model_name, **model_kwargs
         )
 
         self._loaded = True
-        print(f"[VLM] Model loaded successfully!")
+        print(f"[LLM] Model loaded successfully!")
 
         if torch.cuda.is_available():
             vram_used = torch.cuda.memory_allocated() / 1e9
@@ -121,14 +103,19 @@ class VLMEngine:
         if not self._loaded:
             self.load()
 
-        # Format as LLaVA conversation with image
-        # LLaVA expects "<image>" token in the prompt
-        full_prompt = f"USER: <image>\n{prompt}\nASSISTANT:"
+        # Format for Qwen Chat prompt
+        messages = [
+            {"role": "system", "content": "You are an expert Explainable AI (XAI) assistant. Write a short, single-paragraph explanation about why the AI predicted this emotion based on the evidence."},
+            {"role": "user", "content": prompt}
+        ]
+        
+        full_prompt = self.processor.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True
+        )
 
-        # Process inputs
+        # Process inputs (Text only)
         inputs = self.processor(
             text=full_prompt,
-            images=image,
             return_tensors="pt",
         )
 
@@ -136,7 +123,7 @@ class VLMEngine:
         if hasattr(self.model, "device"):
             inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
         else:
-            inputs = {k: v.to("cuda") for k, v in inputs.items()}
+            inputs = {k: v.to("cuda" if torch.cuda.is_available() else "cpu") for k, v in inputs.items()}
 
         # Generate
         with torch.inference_mode():
@@ -151,6 +138,9 @@ class VLMEngine:
         # Decode — only get the newly generated tokens
         generated_ids = output_ids[0, inputs["input_ids"].shape[1]:]
         explanation = self.processor.decode(generated_ids, skip_special_tokens=True).strip()
+        
+        # Clean up weird markdown artifacts common in small text models
+        explanation = explanation.replace("```text", "").replace("```", "").strip()
 
         return explanation
 
