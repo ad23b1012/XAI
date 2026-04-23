@@ -1,8 +1,6 @@
 # Data & Models (too large for git)
 data/
 checkpoints/
-*.pt
-*.pth
 *.ckpt
 *.bin
 *.safetensors
